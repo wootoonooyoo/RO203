@@ -28,38 +28,35 @@ A value can be an integer or a white space
 """
 function readInputFile(inputFile::String)
 
-    # Open the input file
+    # Open input file
     datafile = open(inputFile)
 
+    # Read the input file
     data = readlines(datafile)
     close(datafile)
-    
+
+    # Get the grid size
     n = length(split(data[1], ","))
-    # t = Vector{Int64}(undef, n, n)
+    t = zeros(Int64, n, n)
 
-    # lineNb = 1
+    # For each line of the input file
+    for (lineNb, line) in enumerate(data)
 
-    # # For each line of the input file
-    # for line in data
+        lineSplit = split(line, ",")
 
-    #     lineSplit = split(line, ",")
+        if size(lineSplit, 1) == n
+            for (colNb, value) in enumerate(lineSplit)
 
-    #     if size(lineSplit, 1) == n
-    #         for colNb in 1:n
+                if value != " "
+                    t[lineNb, colNb] = parse(Int64, value)
+                else
+                    t[lineNb, colNb] = 0
+                end
+            end
+        end 
+    end
 
-    #             if lineSplit[colNb] != " "
-    #                 t[lineNb, colNb] = parse(Int64, lineSplit[colNb])
-    #             else
-    #                 t[lineNb, colNb] = 0
-    #             end
-    #         end
-    #     end 
-        
-    #     lineNb += 1
-    # end
-
-    # return t
-
+    return t
 end
 
 """
@@ -148,7 +145,7 @@ end
 """
 Save a grid in a text file
 
-Argument
+Arguments
 - t: 2-dimensional array of size n*n
 - outputFile: path of the output file
 """

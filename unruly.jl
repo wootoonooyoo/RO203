@@ -1,33 +1,12 @@
 #cd("/Users/shawnliewhongwei/Desktop/JuliaTP/TP_Julia")
 #include("XXXX.jl")
 
-# want to write a function that takes in n as an argument where n must be even
-function generateBoard(x::Int64)
-
-    # check for even
-    if x%2 != 0
-        println("Please enter an even number")
-        return error("not even")
-    end
-
-    # create a 2D array n x n
-    board = zeros(Int8, x, x)
-
-    # populate the 2D array
-    board = [0 0 0 1 1 0; 
-            -1 -1 0 0 0 0; 
-            0 0 0 0 0 0; 
-            -1 0 -1 -1 0 0; 
-            0 0 0 0 -1 1; 
-            1 0 -1 0 0 0]
-
-    display(board)
-end
-
 ## solve problem
 using JuMP
 using CPLEX
 using Printf
+include("/Users/shawnliewhongwei/Desktop/JuliaTP/TP_Julia/io.jl")
+
 
 m = Model(CPLEX.Optimizer)
 
@@ -44,11 +23,11 @@ Constraints:
     2. sum of x_ij = n/2 for j = 1 to n
     3. 0 < sum of |x_ij + x_(i+1)j + x_(i+2)j| < 3 for i = 1 to n
     4. 0 <sum of |x_ij + x_i(j+1) + x_i(j+2)| < 3 for j = 1 to n
-    5. Custom-imposed constraints to increase difficulty
+    5. Custom-imposed constraints according to a pre-defined board
 """
-n = 6
-@variable(m, x[i = 1:n, j = 1:n], Bin)   # board
 
+n = 6 # size of board
+@variable(m, x[i = 1:n, j = 1:n], Bin) # x_ij = {1 if white 0 if black}
 @objective(m, Min, sum(x[i, j] for i = 1:n for j = 1:n) - n^2/2)
 
 # constraint 1
@@ -77,19 +56,21 @@ for i = 1:n-2
     end
 end
 
-# constraint 5
-@constraint(m, x[1,3] == 0)
-@constraint(m, x[2,1] == 1)
-@constraint(m, x[2,4] == 0)
-@constraint(m, x[2,5] == 1)
-@constraint(m, x[3,3] == 1)
-@constraint(m, x[3,5] == 1)
-@constraint(m, x[4,1] == 1)
-@constraint(m, x[4,2] == 0)
-@constraint(m, x[4,6] == 1)
-@constraint(m, x[5,5] == 1)
-@constraint(m, x[6,1] == 1)
-@constraint(m, x[6,2] == 1)
+# constraint 5 -- read the board and impose constraints
+# Read instanceTest.txt
+board = readInputFile("/Users/shawnliewhongwei/Desktop/JuliaTP/TP_Julia/instanceTest.txt")
+display(board)
+
+# impose constraints accordingly
+for i in 1:n
+    for j in 1:n
+        if board[i,j] == 1
+            @constraint(m, x[i,j] == 1)
+        elseif board[i,j] == 0
+            @constraint(m, x[i,j] == 0)
+        end
+    end
+end
 
 # solve problem
 optimize!(m)

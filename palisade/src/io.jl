@@ -12,27 +12,36 @@ inputFile: path of the input file
 """
 function readInputFile(inputFile::String)
 
-    # Open the input file
+    # Open input file
     datafile = open(inputFile)
 
+    # Read the input file
     data = readlines(datafile)
     close(datafile)
-    m = size(data,1)-1
-    n = size(split(data[1],","),1)
-    Jeu = Matrix{Int64}(zeros(m, n))
-    # For each line of the input file
-    for l in 1:m
-        t = split(data[l],",")
-        for i in 1:n 
-            if t[i]!=" "
-                Jeu[l][j] = parse(t[i])
-            end
-        # TODO
-        #println("In file io.jl, in method readInputFile(), TODO: read a line of the input file")
-        end
-    end
-    println(Jeu)
 
+    # Get the grid size
+    m = length(split(data[1], ","))
+    n = length(data)
+    t = zeros(Int64, n, m)
+
+    # For each line of the input file
+    for (lineNb, line) in enumerate(data)
+
+        lineSplit = split(line, ",")
+
+        if size(lineSplit, 1) == m
+            for (colNb, value) in enumerate(lineSplit)
+
+                if value != " "
+                    t[lineNb, colNb] = parse(Int64, value)
+                else
+                    t[lineNb, colNb] = -1
+                end
+            end
+        end 
+    end
+
+    return t
 end
 
 
